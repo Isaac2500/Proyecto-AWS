@@ -4,9 +4,9 @@ class profesorValidator {
   check(req, res, next) {
     const schema = Joi.object({
       id: Joi.number().integer().positive().required(),
-      numeroEmpleado: Joi.number().integer().positive().required(),
       nombres: Joi.string().trim().required(),
       apellidos: Joi.string().trim().required(),
+      numeroEmpleado: Joi.number().integer().positive().required(),
       horasClase: Joi.number().integer().positive().required()
     });
     const { error } = schema.validate(req.body);

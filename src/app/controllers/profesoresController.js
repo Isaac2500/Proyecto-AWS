@@ -7,8 +7,8 @@ class profesoresController {
   }
 
   async crearProfesor(req, res) {
-    const { id, numeroEmpleado, nombres, apellidos, horasClase } = req.body;
-    const profesor = { id, numeroEmpleado, nombres, apellidos, horasClase };
+    const { id, nombres, apellidos, numeroEmpleado, horasClase } = req.body;
+    const profesor = { id, nombres, apellidos, numeroEmpleado, horasClase };
     data.profesores.push(profesor);
     return res.status(201).json(profesor);
   }
@@ -25,8 +25,8 @@ class profesoresController {
   //terminar endpoint
   async actualizarProfesor(req, res) {
     const { id } = req.params;
-    const { id:profesorId, numeroEmpleado,nombres, apellidos, horasClase } = req.body;
-    const informacionProfesor = { id, numeroEmpleado, nombres, apellidos, horasClase };
+    const { id:profesorId, nombres, apellidos, numeroEmpleado, horasClase } = req.body;
+    const informacionProfesor = { id, nombres, apellidos, numeroEmpleado, horasClase };
     const posicionProfesor = data.profesores.findIndex((a) => a.id == id);
     if (posicionProfesor === -1) {
       return res.status(404).json({ message: "Profesor no existe" });
