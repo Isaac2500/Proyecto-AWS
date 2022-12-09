@@ -9,6 +9,7 @@ router.get("/alumnos", AlumnosController.alumnos);
 
 router.get("/alumnos/:id", AlumnosController.mostrarAlumno);
 router.post("/alumnos", alumnoValidator.check, AlumnosController.crearAlumno);
+router.post("/alumnos/:id/fotoPerfil", AlumnosController.alumnoFotoPerfil)
 
 router.put("/alumnos/:id", alumnoValidator.check,AlumnosController.actualizarAlumno);
 router.delete("/alumnos/:id", AlumnosController.eliminarAlumno);

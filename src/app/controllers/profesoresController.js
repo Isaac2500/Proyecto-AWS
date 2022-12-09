@@ -1,20 +1,21 @@
-const data = require("../utils/data");
+const Profesor = require('../models/profesor')
 
 class profesoresController {
   async profesores(req, res) {
-    const profesores = data.profesores;
+    const profesores = await Profesor.findAll()
     return res.status(200).json(profesores);
   }
 
   async crearProfesor(req, res) {
-    const { id, nombres, apellidos, numeroEmpleado, horasClase } = req.body;
-    const profesor = { id, nombres, apellidos, numeroEmpleado, horasClase };
-    data.profesores.push(profesor);
-    return res.status(201).json(profesor);
+    const { nombres, apellidos, numeroEmpleado, horasClase } = req.body;
+    const profesor = { nombres, apellidos, numeroEmpleado, horasClase };
+    const profesorCreado = await Profesor.create(profesor)
+    return res.status(201).json(profesorCreado);
   }
+
   async mostrarProfesor(req, res) {
     const { id } = req.params;
-    const profesorEncontrado = data.profesores.find((a) => a.id == id);
+    const profesorEncontrado = await Profesor.findByPk(parseInt(id))
     if (!profesorEncontrado) {
       return res.status(404).json({ message: "profesor no existe" });
     }
@@ -22,27 +23,26 @@ class profesoresController {
     return res.status(200).json(profesorEncontrado);
   }
 
-  //terminar endpoint
   async actualizarProfesor(req, res) {
     const { id } = req.params;
-    const { id:profesorId, nombres, apellidos, numeroEmpleado, horasClase } = req.body;
-    const informacionProfesor = { id, nombres, apellidos, numeroEmpleado, horasClase };
-    const posicionProfesor = data.profesores.findIndex((a) => a.id == id);
-    if (posicionProfesor === -1) {
-      return res.status(404).json({ message: "Profesor no existe" });
+    const { nombres, apellidos, numeroEmpleado, horasClase } = req.body;
+    const profesor = { nombres, apellidos, numeroEmpleado, horasClase };
+    const profesorEncontrado = await Profesor.findByPk(id)
+    if (!profesorEncontrado) {
+      return res.status(404).json({ message: "profesor no existe" });
     }
-    data.profesores[posicionProfesor] = { ...informacionProfesor }
+    await Profesor.update(profesor, { where: { id } })
     return res.status(200).json({ message: "Profesor actualizado" });
   }
 
   async eliminarProfesor(req, res) {
     const { id } = req.params;
-    const profesorEncontrado = data.profesores.find((a) => a.id == id);
-    if (profesorEncontrado === undefined) {
+    const profesorEncontrado = await Profesor.findByPk(id)
+    if (!profesorEncontrado) {
       return res.status(404).json({ message: "profesor no existe" });
     }
-    const profesorFiltrados = data.profesores.filter((a) => a.id != id);
-    data.profesores = profesorFiltrados;
+
+    await profesorEncontrado.destroy()
     return res.status(200).json({ message: "profesor eliminado" });
   }
 }

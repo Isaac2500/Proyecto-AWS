@@ -1,21 +1,41 @@
-const data = require("../utils/data");
+const upload = require("../../config/s3")
+const singleUpload = upload.single("foto")
+const Alumno = require('../models/alumno')
 
 class alumnosController {
   async alumnos(req, res) {
-    const alumnos = data.alumnos;
+    const alumnos = await Alumno.findAll()
     return res.status(200).json(alumnos);
   }
 
   async crearAlumno(req, res) {
-    const { id, nombres, apellidos, matricula, promedio } = req.body;
-    const alumno = { id, nombres, apellidos, matricula, promedio };
-    data.alumnos.push(alumno);
-    return res.status(201).json(alumno);
+    const { nombres, apellidos, matricula, promedio } = req.body;
+    const alumno = { nombres, apellidos, matricula, promedio };
+    const createdUser = await Alumno.create(alumno)
+    return res.status(201).json(createdUser);
+  }
+
+  async alumnoFotoPerfil(req, res){
+    const { id } = req.params;
+    const alumnoEncontrado = await Alumno.findByPk(parseInt(id))
+    if (!alumnoEncontrado) {
+      return res.status(404).json({ message: "alumno no existe" });
+    }
+    singleUpload(req, res, async function(err){
+      if(err){
+        return res.status(400).json({message: 'There was an error', error: err.message})
+      }
+
+      const fotoPerfil = { fotoPerfilUrl: req.file.location }
+      await Alumno.update(fotoPerfil, { where: { id }})
+      const alumnoEncontrado = await Alumno.findByPk(parseInt(id))
+      return res.status(200).json(alumnoEncontrado);
+    })
   }
 
   async mostrarAlumno(req, res) {
     const { id } = req.params;
-    const alumnoEncontrado = data.alumnos.find((a) => (a.id == id));
+    const alumnoEncontrado = await Alumno.findByPk(parseInt(id))
     if (!alumnoEncontrado) {
       return res.status(404).json({ message: "alumno no existe" });
     }
@@ -25,25 +45,26 @@ class alumnosController {
 
   async actualizarAlumno(req, res) {
     const { id } = req.params;
-    const { id:alumnoId, nombres, apellidos, matricula, promedio } = req.body;
-    const informacionAlumno = { id, nombres, apellidos, matricula, promedio };
-    const posicionAlumno = data.alumnos.findIndex((a) => a.id == id);
-    if (posicionAlumno === -1) {
+    const { nombres, apellidos, matricula, promedio } = req.body;
+
+    const alumnoEncontrado = await Alumno.findByPk(id)
+    const alumno = { nombres, apellidos, matricula, promedio }
+    if (!alumnoEncontrado) {
       return res.status(404).json({ message: "alumno no existe" });
     }
-    data.alumnos[posicionAlumno] = { ...informacionAlumno }
-    return res.status(200).json({ message: "alumno actualizado" });
+    await Alumno.update(alumno, { where: { id } })
+    return res.status(200).json({message: 'alumno actualizado'});
   }
 
   async eliminarAlumno(req, res) {
     const { id } = req.params;
-    const alumnoEncontrado = data.alumnos.find((a) => a.id == id);
+    const alumnoEncontrado = await Alumno.findByPk(id)
     if (!alumnoEncontrado) {
       return res.status(404).json({ message: "alumno no existe" });
     }
-    const alumnosFiltrados = data.alumnos.filter((a) => a.id != id);
-    data.alumnos = alumnosFiltrados;
-    return res.status(200).json({ message: "alumno actualizado" });
+
+    await alumnoEncontrado.destroy()
+    return res.status(200).json({ message: "alumno eliminado" });
   }
 }
 
