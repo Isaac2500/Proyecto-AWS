@@ -23,7 +23,7 @@ class alumnosController {
     }
     singleUpload(req, res, async function(err){
       if(err){
-        return res.status(400).json({message: 'There was an error', error: err.message})
+        return res.status(400).json({message: 'There was an error', error: err})
       }
 
       const fotoPerfil = { fotoPerfilUrl: req.file.location }
